@@ -1,116 +1,702 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Virtual Human Population Generator - PopGen</title>
-    <link rel="icon" type="image/png" href="favicon.png"/>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
-  </head>
 
-  <body>
-    <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
-      <symbol id="lightning" viewBox="0 0 16 16">
-        <path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.454L6.823 9.5H3.5a.5.5 0 0 1-.48-.641zM6.374 1 4.168 8.5H7.5a.5.5 0 0 1 .478.647L6.78 13.04 11.478 7H8a.5.5 0 0 1-.474-.658L9.306 1z"/>
-      </symbol>
-    </svg>
-    
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Virtual Human Population Generator - PyPopGen</title>
+
+  <link rel="icon" type="image/png" href="image/favicon.png" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css"
+    integrity="sha256-BOxhuXmRtUd4wUx4Qvsm4ofSwkd5C0WW3ui2uJRHzT4=" crossorigin="anonymous" />
+
+  <script src="https://cdn.jsdelivr.net/npm/bulma-toast@2.4.4/dist/bulma-toast.min.js"
+    integrity="sha256-adP3k/8tMPv7px6l0xCXafWhlym6utSNHxOY9egctJY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/arquero@6.0.0/dist/arquero.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"
+    integrity="sha256-6EJwvQzVvfYP78JtAMKjkcsugfTSanqe4WGFpUdzo88=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts-stat@1.2.0/dist/ecStat.min.js"
+    integrity="sha256-/xLj3SToEeldrxH0s+kpBkAD5sMwo2A8UtLmUppqV4s=" crossorigin="anonymous"></script>
+
+  <script defer type="module" src="script-v0.1/main.js"></script>
+
+  <style type="text/css">
+    .gp-param {
+      width: 7rem;
+    }
+
+    .checkbox+.checkbox {
+      margin-inline-start: .5rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="navbar">
     <div class="container">
-      <h1>PopGen</h1>
-      <form>
-        <div class="row mb-3">
-          <div class="col-sm-2">
-            <label for="inputPopulationSize" class="col-form-label">Population size</label>
-          </div>
-          <div class="col-sm-2">
-            <input type="text" id="inputPopulationSize" class="form-control" aria-describedby="populationSizeHelpInline" value="10">
-          </div>
-          <div class="col-sm-8">
-            <span id="populationSizeHelpInline" class="form-text">
-              [1,100000]
-            </span>
-          </div>
-        </div>
-        <div class="row mb-3">
-          <div class="col-sm-2">
-            <label for="inputProbabilityOfMale" class="col-form-label">Probability of male</label>
-          </div>
-          <div class="col-sm-2">
-            <input type="text" id="inputProbabilityOfMale" class="form-control" aria-describedby="probabilityOfMaleHelpInline" value="0.2">
-          </div>
-          <div class="col-sm-8">
-            <span id="probabilityOfMaleHelpInline" class="form-text">
-              [0,1]
-            </span>
-          </div>
-        </div>
-        <div class="row mb-3">
-          <div class="col-auto">
-            <button type="button" onclick="generate()" class="btn btn-primary">
-              <span id="buttonActivity" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-              <svg id="buttonIcon" width="16" height="16" fill="currentColor" role="img" aria-label="Info:" style="display: none;"><use xlink:href="#lightning"/></svg>
-              <span id="buttonText" role="status">Loading...</span>
-            </button>
-          </div>
-        </div>
-        <div class="row mb-3">
-          <textarea class="form-control" id="output" rows="6" disabled></textarea>
-        </div>
-      </form>
+      <div class="navbar-brand">
+        <a class="navbar-item" href=".">
+          <img src="image/icon.png" alt="Logo">
+          <span class="title ml-4">PyPopGen</span>
+          <span class="subtitle ml-4">Virtual Human Population Generator</span>
+        </a>
+      </div>
     </div>
+  </nav>
 
-    <script>
-      const inputPopulationSize = document.getElementById("inputPopulationSize");
-      const inputProbabilityOfMale = document.getElementById("inputProbabilityOfMale");
-      const buttonActivity = document.getElementById("buttonActivity");
-      const buttonText = document.getElementById("buttonText");
-      const output = document.getElementById("output");
+  <section class="hero is-fullheight">
+    <div class="hero-body">
+      <div class="container">
+        <div class="columns is-12 is-variable ">
+          <div class="column is-6 has-text-left">
+            <fieldset id="fsForm">
 
-      function addToOutput(s) {
-        output.value += ">>>" + "\n" + s + "\n";
-      }
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="txtPopulation">*Size</label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped is-narrow">
+                    <p class="control">
+                      <input id="txtPopulation" class="input gp-param" type="text" placeholder=">= 0">
+                    </p>
+                    <span class="is-align-self-center">individuals</span>
+                  </div>
+                </div>
+              </div>
 
-      async function main() {
-        let pyodide = await loadPyodide();
+              <div class="field is-horizontal">
+                <div class="field-label">
+                  <label class="label" for="rdoP3M">*Source</label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-narrow">
+                    <div class="control">
+                      <label class="radio" for="rdoP3M">
+                        <input id="rdoP3M" type="radio" value="P3M" name="dataset">
+                        P3M (US)
+                      </label>
+                      <label class="radio" for="rdoICRP">
+                        <input id="rdoICRP" type="radio" value="ICRP" name="dataset">
+                        ICRP (Europe)
+                      </label>
+                      <label class="radio" for="rdoHSE">
+                        <input id="rdoHSE" type="radio" value="HSE" name="dataset">
+                        HSE (UK)
+                      </label>
+                      <label class="radio" for="rdoNDNS">
+                        <input id="rdoNDNS" type="radio" value="NDNS" name="dataset">
+                        NDNS (UK)
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-        await pyodide.loadPackage("micropip");
-        const micropip = pyodide.pyimport("micropip");
-        await micropip.install(window.location.origin + '/pypopgenbe-0.1.0-py3-none-any.whl');
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="txtAgeFrom">*Age</label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped is-narrow">
+                    <span class="is-align-self-center">From</span>
+                    <p class="control">
+                      <input id="txtAgeFrom" class="input gp-param" type="text" placeholder=">= 0">
+                    </p>
+                    <span class="is-align-self-center">to</span>
+                    <p class="control">
+                      <input id="txtAgeTo" class="input gp-param" type="text" placeholder="&lt;= 80">
+                    </p>
+                    <span class="is-align-self-center">years&nbsp;</span>
+                    <span id="lblAgeInterval" class="is-align-self-center" style="white-space: nowrap">[0, 80]</span>
+                  </div>
+                </div>
+              </div>
 
-        await pyodide.loadPackage("numpy");
-        await pyodide.runPythonAsync("from pypopgenbe import generatepop");
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="txtBMIFrom"><abbr title="Body Mass Index">*BMI</abbr></label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped is-narrow">
+                    <span class="is-align-self-center">From</span>
+                    <p class="control">
+                      <input id="txtBMIFrom" class="input gp-param" type="text">
+                    </p>
+                    <span class="is-align-self-center">to</span>
+                    <p class="control">
+                      <input id="txtBMITo" class="input gp-param" type="text">
+                    </p>
+                    <span class="is-align-self-center">kg/m&#xB2;</span>
+                  </div>
+                </div>
+              </div>
 
-        buttonActivity.style.display = "none";
-        buttonIcon.style.display = "";
-        buttonText.innerText = "Generate";
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="txtHeightFrom">*Height</label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped is-narrow">
+                    <span class="is-align-self-center">From</span>
+                    <p class="control">
+                      <input id="txtHeightFrom" class="input gp-param" type="text">
+                    </p>
+                    <span class="is-align-self-center">to</span>
+                    <p class="control">
+                      <input id="txtHeightTo" class="input gp-param" type="text">
+                    </p>
+                    <span class="is-align-self-center">cm</span>
+                  </div>
+                </div>
+              </div>
 
-        return pyodide;
-      }
-      let pyodideReadyPromise = main();
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="txtProbabilityOfMale">*Sex</label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped is-narrow">
+                    <span class="is-align-self-center">Probability of males</span>
+                    <p class="control">
+                      <input id="txtProbabilityOfMale" class="input gp-param" type="text" placeholder="[0, 1]">
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-      async function generate() {
-        buttonActivity.style.display = "";
-        buttonIcon.style.display = "none";
-        await new Promise(r => setTimeout(r, 20));
-        let pyodide = await pyodideReadyPromise;
-        try {
-          let locals = pyodide.toPy({ 
-            populationSize: parseInt(inputPopulationSize.value), 
-            probabilityOfMale: parseFloat(inputProbabilityOfMale.value)
-          });
-          let output = await pyodide.runPythonAsync(`
-            population = generatepop.gp(populationSize, probabilityOfMale)
-            population
-          `, { locals });
-          addToOutput(output);
-        } catch (err) {
-          addToOutput(err);
-        }
-        buttonActivity.style.display = "none";
-        buttonIcon.style.display = "";
-      }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
-  </body>
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="txtProbabilityOfWhite">*Ethnicity</label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped is-narrow">
+                    <span class="is-align-self-center">Probability of white</span>
+                    <p class="control">
+                      <input id="txtProbabilityOfWhite" class="input gp-param" type="text" placeholder="[0, 1]">
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="txtProbabilityOfBlack"></label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped is-narrow">
+                    <span class="is-align-self-center">Probability of black</span>
+                    <p class="control">
+                      <input id="txtProbabilityOfBlack" class="input gp-param" type="text" placeholder="[0, 1]">
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="txtProbabilityOfNBH"></label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped is-narrow">
+                    <span class="is-align-self-center">Probability of&nbsp;<span id="lblProbabilityOfNBH">non-black
+                        hispanic</span></span>
+                    <p class="control">
+                      <input id="txtProbabilityOfNBH" class="input gp-param" type="text" placeholder="[0, 1]">
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                </div>
+                <div class="field-body">
+                  <div class="field">
+                    <div class="control">
+                      <p class="help is-align-self-center">where 0 &#x2264; P(W) + P(B) + P(<span
+                          id="lblNBH">NBH</span>) &#x2264; 1</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-2 mb-4">
+                <p class="tag is-info">
+                  All of the following fields have suitable defaults. You may leave them unchanged.
+                </p>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label">
+                  <label class="label" for="chkAdipose"><abbr title="Slowly Perfused Tissues">Slowly
+                      Perf.</abbr></label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-narrow">
+                    <div class="control">
+                      <label class="checkbox">
+                        <input id="chkAdipose" type="checkbox">
+                        Adipose
+                      </label>
+                      <label class="checkbox">
+                        <input id="chkBone" type="checkbox">
+                        Bone
+                      </label>
+                      <label class="checkbox">
+                        <input id="chkMuscle" type="checkbox">
+                        Muscle
+                      </label>
+                      <label class="checkbox">
+                        <input id="chkSkin" type="checkbox">
+                        Skin
+                      </label>
+                    </div>
+                    <p class="help">
+                      By default, these organs will be contained in a "slowly perfused" aggregated
+                      compartment.<br />Check the box to consider the organ separately.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label">
+                  <label class="label" for="chkBrain"><abbr title="Rapidly Perfused Tissues">Rapidly
+                      Perf.</abbr></label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-narrow">
+                    <div class="control">
+                      <label class="checkbox">
+                        <input id="chkBrain" type="checkbox">
+                        Brain
+                      </label>
+                      <label class="checkbox">
+                        <input id="chkGonads" type="checkbox">
+                        Gonads
+                      </label>
+                      <label class="checkbox">
+                        <input id="chkHeart" type="checkbox">
+                        Heart
+                      </label>
+                      <label class="checkbox">
+                        <input id="chkKidney" type="checkbox">
+                        Kidney
+                      </label>
+                      <label class="checkbox">
+                        <input id="chkLiver" type="checkbox">
+                        Liver
+                      </label>
+                      <label class="checkbox">
+                        <input id="chkPancreas" type="checkbox">
+                        Pancreas
+                      </label>
+                    </div>
+                    <div class="control">
+                      <label class="checkbox">
+                        <input id="chkLargeIntestine" type="checkbox">
+                        Large Intestine
+                      </label>
+                      <label class="checkbox">
+                        <input id="chkSmallIntestine" type="checkbox">
+                        Small Intestine
+                      </label>
+                      <label class="checkbox">
+                        <input id="chkSpleen" type="checkbox">
+                        Spleen
+                      </label>
+                      <label class="checkbox">
+                        <input id="chkStomach" type="checkbox">
+                        Stomach
+                      </label>
+                    </div>
+                    <p class="help">
+                      By default, these organs will be contained in a "rapidly perfused" aggregated
+                      compartment.<br />Check the box to consider the organ separately.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="ddlEnzymeRateParameter"><abbr
+                      title="Enzyme Rate of Metabolism (experimental)">Enzyme Rate</abbr></label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped has-addons">
+                    <span class="is-align-self-center" style="white-space: nowrap;">Parameter for enzyme rate</span>
+                    <p class="control">
+                    <div class="select is-align-self-center">
+                      <select id="ddlEnzymeRateParameter">
+                        <option value="Vmax">Vmax, pmol/min/mg</option>
+                        <option value="CLint">CLint, mL/min/&#xB5;g</option>
+                      </select>
+                    </div>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="txtEnzymeName"></label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped has-addons">
+                    <span class="is-align-self-center">Enzyme name</span>
+                    <p class="control is-expanded">
+                      <input id="txtEnzymeName" class="input" type="text" placeholder="name 1 ; name 2 ; ...">
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="txtEnzymeRate"></label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped has-addons">
+                    <span class="is-align-self-center">Enzyme rate</span>
+                    <p class="control is-expanded">
+                      <input id="txtEnzymeRate" class="input" type="text" placeholder="rate 1 ; rate 2 ; ...">
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="ddlFlowUnits">Units</label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped is-narrow">
+                    <span class="is-align-self-center">Flow</span>
+                    <p class="control">
+                    <div class="select">
+                      <select id="ddlFlowUnits">
+                        <option value="MilliLitresPerMinute">ml/min</option>
+                        <option value="LitresPerHour">l/h</option>
+                      </select>
+                    </div>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="ddlEnzymeRateUnits"></label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped is-narrow">
+                    <span class="is-align-self-center">Enzyme rate</span>
+                    <p class="control">
+                    <div class="select">
+                      <select id="ddlEnzymeRateUnits" data-rate-parameter="Vmax">
+                        <option>pmol/min</option>
+                        <option>&#xB5;mol/h</option>
+                        <option>mmol/h</option>
+                        <option>pg/min</option>
+                        <option>&#xB5;g/h</option>
+                        <option>mg/h</option>
+                      </select>
+                    </div>
+                    </p>
+                  </div>
+                  <div class="field is-grouped is-narrow">
+                    <span class="is-align-self-center">RMM</span>
+                    <p class="control">
+                      <input id="txtRMM" class="input gp-param" type="text" placeholder="> 0">
+                    </p>
+                    <span class="is-align-self-center">g/mol</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label" for="txtSeed">Sampling</label>
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped is-narrow">
+                    <span class="is-align-self-center">Seed</span>
+                    <p class="control">
+                      <input id="txtSeed" class="input gp-param" type="text" placeholder=">= 0">
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                </div>
+                <div class="field-body">
+                  <div class="field is-grouped">
+                    <span class="is-align-self-center">Population type</span>
+                    <div class="control">
+                      <div class="field-label is-normal">
+                        <label class="radio">
+                          <input id="rdoRealistic" type="radio" name="populationtype" value="Realistic">
+                          Realistic
+                        </label>
+                        <label class="radio">
+                          <input id="rdoHighVariation" type="radio" name="populationtype" value="HighVariation">
+                          High variation
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field is-horizontal">
+                <div class="field-label">
+                  <p class="help">
+                    * mandatory field
+                  </p>
+                </div>
+                <div class="field-body">
+                  <div class="field">
+                    <div class="control">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </fieldset>
+          </div>
+
+          <div class="column is-6 has-text-left">
+
+            <div class="field is-grouped">
+              <div class="control">
+                <button id="btnGenerate" class="button is-primary is-responsive is-small">
+                  <span>Generate</span>
+                  <span class="icon">
+                    <svg fill="currentColor" role="img">
+                      <use xlink:href="#svgGenerate" />
+                    </svg>
+                  </span>
+                </button>
+              </div>
+              <div class="control">
+                <button id="btnDownload" class="button is-primary is-responsive is-small" disabled="disabled">
+                  <span>Download</span>
+                  <span class="icon">
+                    <svg fill="currentColor" role="img">
+                      <use xlink:href="#svgDownload" />
+                    </svg>
+                  </span>
+                </button>
+              </div>
+              <div class="control">
+                <button id="btnContinue" class="button is-primary is-responsive is-small" disabled="disabled">
+                  <span>Continue</span>
+                  <span class="icon">
+                    <svg fill="currentColor" role="img">
+                      <use xlink:href="#svgContinue" />
+                    </svg>
+                  </span>
+                </button>
+              </div>
+              <div class="control">
+                <button id="btnReset" class="button is-primary is-responsive is-small">
+                  <span>Reset</span>
+                  <span class="icon">
+                    <svg fill="currentColor" role="img">
+                      <use xlink:href="#svgReset" />
+                    </svg>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div id="dvGenerate" class="box p-6">
+              <div class="content">
+                <p>
+                  PyPopGen is a <a href="https://github.com/PyPopGen/PyPopGenBE" target="_blank">Python port</a> of the
+                  <a href="https://xnet.hsl.gov.uk/Popgen/" target="_blank">MATLAB implementation</a> reported in <a
+                    href="https://doi.org/10.1016/j.tox.2013.07.009" target="_blank">McNally et al., 2014.</a>
+                  Population generation takes place entirely locally in your browser (<a
+                    href="https://pyodide.org/en/stable/project/about.html" target="_blank">explanation</a>).
+                  Both <a href="https://github.com/PyPopGen/pypopgen.github.io" target="_blank">app</a> and
+                  <a href="https://github.com/PyPopGen/PyPopGenBE" target="_blank">port</a> are <a
+                    href="https://opensource.org/license/mit" target="_blank">open source and permissively
+                    licensed</a>.
+                </p>
+              </div>
+              <div class="container">
+                <div class="columns">
+                  <div class="column is-one-third">
+                    <p>
+                      <a href="https://github.com/PyPopGen/pypopgen.github.io/blob/main/INTRO.md" target="_blank">About
+                        PopGen</a>
+                    </p>
+                    <p>
+                      <a href="https://github.com/PyPopGen/pypopgen.github.io/blob/main/INPUT.md" target="_blank">About
+                        Inputs</a>
+                    </p>
+                  </div>
+                  <div class="column">
+                    <p>
+                      <a href="https://github.com/PyPopGen/pypopgen.github.io/issues" target="_blank">Submit Issue
+                        (app)</a>
+                    </p>
+                    <p>
+                      <a href="https://github.com/PyPopGen/PyPopGenBE/issues" target="_blank">Submit Issue (port)</a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="dvProgress" class="box p-6 is-hidden" aria-busy="true" aria-describedby="progGenPop">
+              <div class="content">
+                <progress id="progGenPop" class="progress is-primary" aria-label="Loading Python/Generating individuals"
+                  value="30" max="100"></progress>
+                <div id="dvProgMessage" class="p-4 has-text-centered"></div>
+                <div class="p-4 has-text-centered">
+                  <button id="btnProgCancel" class="button is-danger is-responsive is-small">
+                    <span>Cancel</span>
+                    <span class="icon">
+                      <svg fill="currentColor" role="img">
+                        <use xlink:href="#svgCancel" />
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="dvResults" class="box is-hidden">
+              <div class="columns">
+                <div class="column is-flex-grow-0">
+                  <div class="field">
+                    <label class="label is-small is-responsive has-text-centered" for="ddlX">X</label>
+                    <div class="control">
+                      <div class="select is-small is-responsive">
+                        <select id="ddlX"></select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="column is-flex-grow-0">
+                  <div class="field">
+                    <label class="label is-small is-responsive has-text-centered" for="ddlY">Y</label>
+                    <div class="control">
+                      <div class="select is-small is-responsive">
+                        <select id="ddlY"></select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="column is-flex-grow-0">
+                  <div class="field">
+                    <label class="label is-small is-responsive has-text-centered" for="ddlPartition">Partition</label>
+                    <div class="control">
+                      <div class="select is-small is-responsive">
+                        <select id="ddlPartition">
+                          <option value="None">(None)</option>
+                          <option value="Sex">Sex</option>
+                          <option value="Ethnicity">Ethnicity</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="dvChart" style="width: 100%; aspect-ratio: 1.618 / 1"></div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="is-hidden">
+    <svg id="svgGenerate" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M6.5 12.671L11.5276 4H13V10H17.5V11.3308L12.516 20H11V14H6.5V12.671ZM8.30578 12.5H12.5V17.0319L15.6998 11.5H11.5V7.0242L8.30578 12.5Z"
+        fill="#1F2328"></path>
+    </svg>
+    <svg id="svgDownload" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M5 18V13.5862H6.5V16.5H17.5V13.5862H19V18H5Z" fill="#1F2328">
+      </path>
+      <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M12.75 11.1287L14.5253 9.35331L15.586 10.414L12 14L8.41393 10.414L9.47459 9.35331L11.25 11.1287V6H12.75V11.1287Z"
+        fill="#1F2328"></path>
+    </svg>
+    <svg id="svgContinue" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M20 6V18H18.5V6H20ZM14.1894 11L10.284 7.0946L11.3446 6.03394L17.0607 11.75L11.3446 17.466L10.284 16.4054L14.1894 12.5H4V11H14.1894Z"
+        fill="#1F2328"></path>
+    </svg>
+    <svg id="svgReset" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M8.87 10.5046L10.8204 12.4504L9.76045 13.511L6 9.75456L9.76045 5.99805L10.8204 7.05871L8.87 9.00456H18V18H11.9532V16.5H16.5V10.5046H8.87Z"
+        fill="#1F2328"></path>
+    </svg>
+    <svg id="svgCancel" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M4 4H20V20H4V4ZM5.5 5.5V18.5H18.5V5.5H5.5Z" fill="#1F2328">
+      </path>
+      <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M10.9393 12L8.64124 9.702L9.7019 8.64134L11.9999 10.9394L14.2981 8.64121L15.3587 9.70187L13.0606 12L15.3587 14.2981L14.298 15.3587L11.9999 13.0607L9.70188 15.3587L8.64122 14.2981L10.9393 12Z"
+        fill="#1F2328"></path>
+    </svg>
+  </div>
+
+</body>
+
+<script blocking="render">
+  if (typeof String.prototype.toWellFormed === "undefined") { // not ECMAScript2025 (2023 or later)
+    window.document.body.innerHTML =
+      `<div style="position: fixed; inset: 0px; width: 30rem; height: 6rem; max-width: 100vw; max-height: 100dvh; margin: auto;">
+              <div style="text-transform: uppercase; text-align: center; color: red; font-weight: bold;">
+                  Up-to-date web browser required. Please update or change your browser and try again.
+                  <br/><br/>
+                  <a href="https://www.whatismybrowser.com/" target="_blank">More information</a>
+              </div>
+          </div>`;
+  }
+</script>
+
+<script id="pyGeneratePop" type="text/plain">
+if probs_of_ethnicities is not None:
+  probs_of_ethnicities = tuple(probs_of_ethnicities)
+
+pg.generate_pop(
+  population_size=population_size,
+  dataset_name=dataset_name,
+  age_range=tuple(age_range),
+  bmi_range=tuple(bmi_range),
+  height_range=tuple(height_range),
+  prob_of_male=prob_of_male,
+  probs_of_ethnicities=probs_of_ethnicities,
+  is_richly_perfused_tissue_discrete=is_richly_perfused_tissue_discrete,
+  is_slowly_perfused_tissue_discrete=is_slowly_perfused_tissue_discrete,
+  enzyme_rate_parameter=enzyme_rate_parameter,
+  enzyme_names=enzyme_names,
+  in_vitro_enzyme_rates=in_vitro_enzyme_rates,
+  flow_units=flow_units,
+  enzyme_rate_units=enzyme_rate_units,
+  molecular_weight=molecular_weight,
+  seed=seed,
+  population_type=population_type,
+  callback=callback
+)
+</script>
+
+<script id="pyPopToCsv" type="text/plain">
+pop_to_csv(population)
+</script>
+
 </html>
