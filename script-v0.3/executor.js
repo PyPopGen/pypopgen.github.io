@@ -22,7 +22,7 @@ function onMessage(event) {
 const generatePopAsync = (() => {
   return (pyGeneratePop, pyPopToCsv, inputs, onUpdate) => {
     if (!pyodideWorker) {
-      pyodideWorker = new Worker("./script-v0.2/worker.js");
+      pyodideWorker = new Worker("./script-v0.3/worker.js");
       pyodideWorker.onmessage = onMessage;
     }
 

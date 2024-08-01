@@ -20,7 +20,7 @@
   <script src="https://cdn.jsdelivr.net/npm/echarts-stat@1.2.0/dist/ecStat.min.js"
     integrity="sha256-/xLj3SToEeldrxH0s+kpBkAD5sMwo2A8UtLmUppqV4s=" crossorigin="anonymous"></script>
 
-  <script defer type="module" src="script-v0.2/main.js"></script>
+  <script defer type="module" src="script-v0.3/main.js"></script>
 
   <style type="text/css">
     .gp-param {
@@ -577,35 +577,47 @@
             <div id="dvResults" class="box is-hidden">
               <div class="columns">
                 <div class="column is-flex-grow-0">
-                  <div class="field">
-                    <label class="label is-small is-responsive has-text-centered" for="ddlX">X</label>
-                    <div class="control">
-                      <div class="select is-small is-responsive">
-                        <select id="ddlX"></select>
+                  <div class="field is-horizontal">
+                    <div class="field-label is-small mr-2">
+                      <label class="label is-responsive" for="ddlX">X</label>
+                    </div>
+                    <div class="field-body">
+                      <div class="control">
+                        <div class="select is-small is-responsive">
+                          <select id="ddlX"></select>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="column is-flex-grow-0">
-                  <div class="field">
-                    <label class="label is-small is-responsive has-text-centered" for="ddlY">Y</label>
-                    <div class="control">
-                      <div class="select is-small is-responsive">
-                        <select id="ddlY"></select>
+                  <div class="field is-horizontal">
+                    <div class="field-label is-small mr-2">
+                      <label class="label is-responsive" for="ddlY">Y</label>
+                    </div>
+                    <div class="field-body">
+                      <div class="control">
+                        <div class="select is-small is-responsive">
+                          <select id="ddlY"></select>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="column is-flex-grow-0">
-                  <div class="field">
-                    <label class="label is-small is-responsive has-text-centered" for="ddlPartition">Partition</label>
-                    <div class="control">
-                      <div class="select is-small is-responsive">
-                        <select id="ddlPartition">
-                          <option value="None">(None)</option>
-                          <option value="Sex">Sex</option>
-                          <option value="Ethnicity">Ethnicity</option>
-                        </select>
+                  <div class="field is-horizontal">
+                    <div class="field-label is-small mr-2">
+                      <label class="label is-responsive" for="ddlPartition">Partition</label>
+                    </div>
+                    <div class="field-body">
+                      <div class="control">
+                        <div class="select is-small is-responsive">
+                          <select id="ddlPartition">
+                            <option value="None">(None)</option>
+                            <option value="Sex">Sex</option>
+                            <option value="Ethnicity">Ethnicity</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
                   </div>

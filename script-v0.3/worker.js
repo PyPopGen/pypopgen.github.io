@@ -7,11 +7,11 @@ async function loadPyodideAndPackages() {
 
   await self.pyodide.loadPackage("micropip");
   const micropip = self.pyodide.pyimport("micropip");
-  await micropip.install(self.location.origin + '/pypopgenbe-1.5.4-py3-none-any.whl');
+  await micropip.install(self.location.origin + '/pypopgenbe-1.5.5-py3-none-any.whl');
 
   await self.pyodide.runPythonAsync("import pypopgenbe as pg");
-  await self.pyodide.runPythonAsync("from pypopgenbe.impl.enum import EnzymeRateCLintUnits, EnzymeRateParameter, EnzymeRateVmaxUnits, Dataset, FlowUnits, PopulationType");
-  await self.pyodide.runPythonAsync("from pypopgenbe.impl.poptocsv import pop_to_csv");
+  await self.pyodide.runPythonAsync("from pypopgenbe import EnzymeRateCLintUnits, EnzymeRateParameter, EnzymeRateVmaxUnits, Dataset, FlowUnits, PopulationType");
+  await self.pyodide.runPythonAsync("from pypopgenbe import pop_to_csv");
 }
 
 let pyodideReadyPromise = loadPyodideAndPackages();
